@@ -4,24 +4,22 @@ const getLabelsFromExercise = (response) => {
     return response.training_sessions.map(session => new Date(session.date).toLocaleDateString("en-GB"));
 };
 
-const getSeriesFromExercise = (response) => {
-    const findMaxWeight = (breakdown) => {
-        if (breakdown.length === 0) { // no entries
-            return 0
-        }
-        let maxWeight = breakdown[0][0];
-        breakdown.forEach(breakdown => {
-            if (breakdown[0] > maxWeight) {
-                maxWeight = breakdown[0]
-            }
-        });
-        return maxWeight
 
+const getSeriesFromExercise = (response) => {
+    const getWeightFromBreakdown = (breakdown) => {
+        if (!breakdown) {
+            return 0;
+        }
+        return breakdown[0]
     }
-    // [ [[80, 6], [85, 6], ... ]], [[], []] ]
-    const breakdowns = response.training_sessions.map(session => session.breakdown);
-    const maxWeightPerSession = breakdowns.map(breakdown => findMaxWeight(breakdown))
-    return maxWeightPerSession;
+    const weightPerSession = [[], [], []]
+    response.training_sessions.forEach(session => {
+        const sessionBreakdowns = session.breakdown.slice(0, 3);
+        weightPerSession[0].push(getWeightFromBreakdown(sessionBreakdowns[0]));
+        weightPerSession[1].push(getWeightFromBreakdown(sessionBreakdowns[1]));
+        weightPerSession[2].push(getWeightFromBreakdown(sessionBreakdowns[2]));
+    });
+    return weightPerSession;
 };
 
 const mapEntries = (response) => {
@@ -35,7 +33,7 @@ const mapEntries = (response) => {
     response.forEach(exercise => {
         const data = {
             labels: getLabelsFromExercise(exercise),
-            series: [getSeriesFromExercise(exercise)]
+            series: getSeriesFromExercise(exercise)
         }
         new Chartist.Line(`.ct-chart${idx++}`, data);
     });

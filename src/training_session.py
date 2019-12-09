@@ -4,7 +4,7 @@ import datetime
 
 LAST_POUNDS_DATE = datetime.datetime(2019, 8, 12)
 
-MAX_REPETITIONS = 10
+MAX_REPETITIONS = 8
 RE_MATCHER = re.compile('^[0-9]+')
 
 
