@@ -1,5 +1,5 @@
 import json
-from .training_session import TrainingSession
+from training_session import TrainingSession
 
 class Exercise(object):
     def __init__(self, card):

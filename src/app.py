@@ -1,7 +1,7 @@
 import os
 import flask
 from trello import TrelloClient
-from .exercise import Exercise
+from exercise import Exercise
 
 app = flask.Flask(__name__)
 
@@ -16,7 +16,7 @@ def after_request(response):
 def hello():
     cards = getGYMCards()
     exercises = []
-    for card in cards:
+    for card in cards[1:]:
         exercises.append(Exercise(card).get_json())
     
     return flask.jsonify(exercises)
@@ -43,6 +43,5 @@ def getGYMCards():
         all_cards += open_list.list_cards()
     return all_cards
 
-#deadliftCard = list(filter(lambda card: card.name == 'Deadlift', getGYMCards()))[0]
-
-#deadliftExercise = Exercise(deadliftCard)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,3 +1,5 @@
+let id = 0;
+
 const getLabelsFromExercise = (response) => {
     return response.training_sessions.map(session => new Date(session.date).toLocaleDateString("en-GB"));
 };
@@ -24,16 +26,28 @@ const getSeriesFromExercise = (response) => {
 
 const mapEntries = (response) => {
     let idx = 0;
+    let chartHTML = '';
+    response.forEach(exercise => {
+        chartHTML += getChartHTML(exercise, idx++);
+    });
+    document.getElementsByClassName('chart-container')[0].innerHTML = chartHTML;
+    idx = 0;
     response.forEach(exercise => {
         const data = {
             labels: getLabelsFromExercise(exercise),
             series: [getSeriesFromExercise(exercise)]
         }
-
-        // TODO - Generate HTML elements instead
-        document.getElementById(`chart${idx}`).innerHTML = exercise.exercise;
         new Chartist.Line(`.ct-chart${idx++}`, data);
     });
+};
+
+const getChartHTML = (exercise, idx) => {
+    return `
+    <div>
+        <h2>${exercise.exercise}</h2>
+        <div style="max-width: 50%" class="ct-chart${idx} ct-major-twelfth"></div>
+    </div>
+    `
 };
 
 const Http = new XMLHttpRequest();
