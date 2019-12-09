@@ -1,5 +1,25 @@
 import os
+import flask
 from trello import TrelloClient
+from .exercise import Exercise
+
+app = flask.Flask(__name__)
+
+@app.after_request
+def after_request(response):
+  response.headers.add('Access-Control-Allow-Origin', '*')
+  response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+  response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  return response
+
+@app.route('/')
+def hello():
+    cards = getGYMCards()
+    exercises = []
+    for card in cards:
+        exercises.append(Exercise(card).get_json())
+    
+    return flask.jsonify(exercises)
 
 client = TrelloClient(
     api_key=os.environ['TRELLO_API_KEY'],
@@ -23,4 +43,6 @@ def getGYMCards():
         all_cards += open_list.list_cards()
     return all_cards
 
-print(getGYMCards())
+#deadliftCard = list(filter(lambda card: card.name == 'Deadlift', getGYMCards()))[0]
+
+#deadliftExercise = Exercise(deadliftCard)
