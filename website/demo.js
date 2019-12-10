@@ -12,7 +12,7 @@ const getBreakdownPropertyByIdx = (breakdown, idx) => {
     if (!breakdown) {
         return 0;
     }
-    return breakdown[idx];
+    return breakdown[idx] || 0;
 };
 
 const flatTrainingSessionsWithProperty = (response, propertyIndex) => {
@@ -47,24 +47,39 @@ const mapEntries = (response) => {
             labels: getLabelsFromExercise(exercise),
             series: getWeightsPerRepFromExercise(exercise)
         }
-        new Chartist.Line(`.ct-chart-weight-per-rep${idx++}`, data);
+        new Chartist.Line(`#ct-chart-weight-per-rep${idx++}`, data, {
+            plugins: [
+                Chartist.plugins.ctPointLabels({
+                    textAnchor: 'middle'
+                })
+            ]
+        });
     });
     idx = 0;
     response.forEach(exercise => {
         const data = {
             labels: getLabelsFromExercise(exercise),
-            series: getNumberOfRepsFromExercise(exercise)
+            series: getNumberOfRepsFromExercise(exercise),
         }
-        new Chartist.Line(`.ct-chart-number-of-reps${idx++}`, data);
+        new Chartist.Bar(`#ct-chart-number-of-reps${idx++}`, data, {
+            axisY: {
+                type: Chartist.AUTOSCALEAXIS,
+                scaleMinSpace: 1,
+                referenceValue: 6,
+                onlyInteger: true,
+            }
+        });
     });
 };
 
 const getChartHTML = (exercise, idx) => {
     return `
     <div>
-        <h2>${exercise.exercise}</h2>
-        <div class="ct-chart-weight-per-rep${idx} ct-major-twelfth"></div>
-        <div class="ct-chart-number-of-reps${idx} ct-major-twelfth"></div>
+        <h2 style="text-align: center">${exercise.exercise}</h2>
+        <h5>Weight per set</h5>
+        <div class="ct-chart" id="ct-chart-weight-per-rep${idx}"></div>
+        <h5>Repetitions per set</h5>
+        <div class="ct-chart" id="ct-chart-number-of-reps${idx}"></div>
     </div>
     `
 };
