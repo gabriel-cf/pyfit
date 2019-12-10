@@ -1,25 +1,37 @@
 let id = 0;
 
+const BREAKDOWN_WEIGHT_IDX = 0;
+const BREAKDOWN_REPS_IDX = 1;
+const SERIES_PER_SESSION = 3;
+
 const getLabelsFromExercise = (response) => {
     return response.training_sessions.map(session => new Date(session.date).toLocaleDateString("en-GB"));
 };
 
-
-const getSeriesFromExercise = (response) => {
-    const getWeightFromBreakdown = (breakdown) => {
-        if (!breakdown) {
-            return 0;
-        }
-        return breakdown[0]
+const getBreakdownPropertyByIdx = (breakdown, idx) => {
+    if (!breakdown) {
+        return 0;
     }
-    const weightPerSession = [[], [], []]
+    return breakdown[idx];
+};
+
+const flatTrainingSessionsWithProperty = (response, propertyIndex) => {
+    const listPerSeries = [[], [], []]
     response.training_sessions.forEach(session => {
-        const sessionBreakdowns = session.breakdown.slice(0, 3);
-        weightPerSession[0].push(getWeightFromBreakdown(sessionBreakdowns[0]));
-        weightPerSession[1].push(getWeightFromBreakdown(sessionBreakdowns[1]));
-        weightPerSession[2].push(getWeightFromBreakdown(sessionBreakdowns[2]));
+        const sessionBreakdowns = session.breakdown.slice(0, SERIES_PER_SESSION);
+        for (let series = 0; series < SERIES_PER_SESSION; series++) {
+            listPerSeries[series].push(getBreakdownPropertyByIdx(sessionBreakdowns[series], propertyIndex));
+        }
     });
-    return weightPerSession;
+    return listPerSeries;
+};
+
+const getWeightsPerRepFromExercise = (response) => {
+    return flatTrainingSessionsWithProperty(response, BREAKDOWN_WEIGHT_IDX);
+};
+
+const getNumberOfRepsFromExercise = (response) => {
+    return flatTrainingSessionsWithProperty(response, BREAKDOWN_REPS_IDX);
 };
 
 const mapEntries = (response) => {
@@ -33,9 +45,17 @@ const mapEntries = (response) => {
     response.forEach(exercise => {
         const data = {
             labels: getLabelsFromExercise(exercise),
-            series: getSeriesFromExercise(exercise)
+            series: getWeightsPerRepFromExercise(exercise)
         }
-        new Chartist.Line(`.ct-chart${idx++}`, data);
+        new Chartist.Line(`.ct-chart-weight-per-rep${idx++}`, data);
+    });
+    idx = 0;
+    response.forEach(exercise => {
+        const data = {
+            labels: getLabelsFromExercise(exercise),
+            series: getNumberOfRepsFromExercise(exercise)
+        }
+        new Chartist.Line(`.ct-chart-number-of-reps${idx++}`, data);
     });
 };
 
@@ -43,7 +63,8 @@ const getChartHTML = (exercise, idx) => {
     return `
     <div>
         <h2>${exercise.exercise}</h2>
-        <div style="max-width: 50%" class="ct-chart${idx} ct-major-twelfth"></div>
+        <div class="ct-chart-weight-per-rep${idx} ct-major-twelfth"></div>
+        <div class="ct-chart-number-of-reps${idx} ct-major-twelfth"></div>
     </div>
     `
 };
