@@ -1,0 +1,1 @@
+docker run --name pyfit-nginx -d -p 5500:80 pyfit-site
