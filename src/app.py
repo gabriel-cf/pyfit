@@ -16,7 +16,7 @@ def after_request(response):
 def hello():
     cards = getGYMCards()
     exercises = []
-    for card in cards[1:]:
+    for card in cards:
         exercises.append(Exercise(card).get_json())
     
     return flask.jsonify(exercises)
