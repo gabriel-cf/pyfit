@@ -5,7 +5,7 @@ import datetime
 LAST_POUNDS_DATE = datetime.datetime(2019, 8, 12)
 
 MAX_REPETITIONS = 8
-RE_MATCHER = re.compile('^[0-9]+')
+RE_MATCHER = re.compile(r'^[0-9]+\.?[0-9]{0,2}')
 
 
 class TrainingSession(object):
@@ -30,7 +30,7 @@ class TrainingSession(object):
             if len(all_numbers) == 0:
                 continue
 
-            number = int(all_numbers[0])
+            number = float(all_numbers[0])
             if number > MAX_REPETITIONS:
                 lastWeight = self._ensure_kg(number)
             else:
